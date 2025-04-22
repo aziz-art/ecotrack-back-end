@@ -15,12 +15,19 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Ecotrack Backend API' });
 });
 
+// Test route
+app.get('/test', (req, res) => {
+  res.send('Test route works');
+});
+
 const authRoutes = require('./routes/auth.route');
 const messagesRoutes = require('./routes/messages.route');
+const toursRoutes = require('./routes/tours.route');
 
 // TODO: Import and use routes here
 app.use('/auth', authRoutes);
 app.use('/messages', messagesRoutes);
+app.use('/tours', toursRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
