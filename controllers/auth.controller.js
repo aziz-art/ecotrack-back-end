@@ -148,3 +148,26 @@ exports.getAll = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getUserProfile = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const [rows] = await pool.query('SELECT * FROM wp_users WHERE ID = ?', [userId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = rows[0];
+    // Return user info for frontend dynamic display
+    res.json({
+      id: user.ID,
+      username: user.user_login,
+      email: user.user_email,
+      userImageUrl: user.user_url || null
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
