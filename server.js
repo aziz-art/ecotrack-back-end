@@ -23,11 +23,13 @@ app.get('/test', (req, res) => {
 const authRoutes = require('./routes/auth.route');
 const messagesRoutes = require('./routes/messages.route');
 const toursRoutes = require('./routes/tours.route');
+const alertsRoutes = require('./routes/alerts.route');
 
 // TODO: Import and use routes here
 app.use('/auth', authRoutes);
 app.use('/messages', messagesRoutes);
 app.use('/tours', toursRoutes);
+app.use('/', alertsRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
