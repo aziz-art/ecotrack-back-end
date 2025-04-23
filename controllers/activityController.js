@@ -4,10 +4,9 @@ exports.getHistory = async (req, res) => {
   const { user_id } = req.params;
   try {
     const [rows] = await pool.execute(
-      `SELECT h.*, t.*, g.* 
+      `SELECT h.*, t.* 
        FROM ec_activity_history h 
        JOIN ec_tours t ON h.tour_id = t.id 
-       LEFT JOIN wp_users g ON t.guide_id = g.ID
        WHERE h.user_id = ?
        ORDER BY h.completed_at DESC`,
       [user_id]
@@ -17,6 +16,7 @@ exports.getHistory = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.deleteHistoryItem = async (req, res) => {
   const { id } = req.params;

@@ -49,22 +49,50 @@ exports.mettreAJourRecommandations = async (req, res) => {
   const { user_id } = req.body;
 
   try {
-    // Simple logic: delete old recs and regenerate
+    // 1. Delete old recommendations
     await pool.execute('DELETE FROM ec_recommendations WHERE user_id = ?', [user_id]);
 
-    const [tours] = await pool.execute(
-      'SELECT id FROM ec_tours ORDER BY RAND() LIMIT 5'
+    // 2. Get user preferences
+    const [prefsRows] = await pool.execute(
+      `SELECT activity_type, budget_range, duration_preference
+       FROM ec_user_preferences WHERE user_id = ?`,
+      [user_id]
     );
+
+    if (prefsRows.length === 0) {
+      return res.status(404).json({ message: "Aucune préférence trouvée pour cet utilisateur." });
+    }
+
+    const prefs = prefsRows[0];
+
+    // 3. Get tours that match preferences and are not already completed or recommended
+    const [tours] = await pool.execute(
+      `SELECT id FROM ec_tours 
+       WHERE activity_type = ? OR budget_range = ? OR duration <= ?
+       AND id NOT IN (
+         SELECT recommended_tour_id FROM ec_recommendations WHERE user_id = ?
+         UNION
+         SELECT tour_id FROM ec_activity_history WHERE user_id = ?
+       )
+       ORDER BY RAND()
+       LIMIT 5`,
+      [prefs.activity_type, prefs.budget_range, prefs.duration_preference, user_id, user_id]
+    );
+
+    if (tours.length === 0) {
+      return res.status(200).json({ message: 'Aucune nouvelle recommandation possible selon les préférences actuelles.' });
+    }
 
     const now = new Date();
     for (let tour of tours) {
       await pool.execute(
-        'INSERT INTO ec_recommendations (user_id, recommended_tour_id, created_at) VALUES (?, ?, ?)',
+        `INSERT INTO ec_recommendations (user_id, recommended_tour_id, created_at)
+         VALUES (?, ?, ?)`,
         [user_id, tour.id, now]
       );
     }
 
-    res.status(200).json({ message: 'Recommandations mises à jour.' });
+    res.status(200).json({ message: 'Recommandations mises à jour selon les préférences.', recommendations: tours });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

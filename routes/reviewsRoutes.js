@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const reviewsController = require('../controllers/reviewsController');
+const controller = require('../controllers/reviewsController');
 
-router.post('/submit', reviewsController.soumettreAvis);
-router.get('/search', reviewsController.filtrerAvisParMotCle);
+router.post('/submit', controller.soumettreAvis);
+router.get('/search', controller.filtrerAvisParMotCle);
+router.put('/update-rating/:guide_id', controller.calculerNoteMoyenne);
 
 module.exports = router;
