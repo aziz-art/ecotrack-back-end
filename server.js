@@ -1,7 +1,16 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const pool = require("./config/db");
+const bodyParser = require("body-parser");
+const bookingRoutes = require("./routes/bookingRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+
+const reviewsRoutes = require("./routes/reviewsRoutes");
+const guideRatingsRoutes = require("./routes/guideRatingsRoutes");
+const preferencesRoutes = require("./routes/preferencesRoutes");
+const recommendationsRoutes = require("./routes/recommendationsRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,8 +20,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Basic route
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to Ecotrack Backend API' });
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to Ecotrack Backend API" });
 });
 
 // Test route
@@ -31,6 +40,26 @@ app.use('/messages', messagesRoutes);
 app.use('/tours', toursRoutes);
 app.use('/', alertsRoutes);
 
+app.use("/reviews", reviewsRoutes);
+app.use("/guide-ratings", guideRatingsRoutes);
+app.use("/preferences", preferencesRoutes);
+app.use("/recommendations", recommendationsRoutes);
+app.use("/history", activityRoutes);
+
+app.use("/booking", bookingRoutes);
+app.use("/payment", paymentRoutes);
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// Pour tester la connection de base
+
+(async () => {
+  try {
+    const [rows] = await pool.query("SELECT 1");
+    console.log("Database connection successful:", rows);
+  } catch (err) {
+    console.error("Database connection failed:", err.message);
+  }
+})();
