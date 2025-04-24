@@ -2,90 +2,56 @@ const WeatherAlert = require('../models/WeatherAlert.model');
 const weatherService = require('../services/weather.service');
 const apiResponse = require('../utils/apiResponse');
 
-exports.createAlert = async (req, res) => {
+exports.declencherAlerte = async (req, res) => {
   try {
-    const alertId = await WeatherAlert.create(req.body);
-    return apiResponse.success(res, { id: alertId }, 'Alert created successfully');
+    const alertId = await weatherService.triggerAlert(req.body);
+    return apiResponse.success(res, alertId, 'Alerte créée avec succès');
   } catch (error) {
-    return apiResponse.error(res, error, 'Failed to create alert');
+    return apiResponse.error(res, error, 'Échec de la création de l\'alerte');
   }
 };
 
-exports.getActiveAlerts = async (req, res) => {
+exports.getAlertesActives = async (req, res) => {
   try {
-    const alerts = await WeatherAlert.getActiveAlerts();
-    return apiResponse.success(res, alerts, 'Active alerts retrieved successfully');
+    const userId = req.params.user_id;
+    const alerts = await WeatherAlert.getActiveAlerts(userId);
+    return apiResponse.success(res, alerts, 'Alertes actives récupérées avec succès');
   } catch (error) {
-    return apiResponse.error(res, error, 'Failed to retrieve active alerts');
+    return apiResponse.error(res, error, 'Échec de la récupération des alertes actives');
   }
 };
 
-exports.updateAlert = async (req, res) => {
+exports.marquerCommeVue = async (req, res) => {
   try {
-    const id = req.params.id;
-    const affectedRows = await WeatherAlert.update(id, req.body);
+    const alertId = req.params.alert_id;
+    const affectedRows = await WeatherAlert.markAsSeen(alertId);
     if (affectedRows === 0) {
-      return apiResponse.error(res, null, 'Alert not found', 404);
+      return apiResponse.error(res, null, 'Alerte non trouvée', 404);
     }
-    return apiResponse.success(res, null, 'Alert updated successfully');
+    return apiResponse.success(res, null, 'Alerte marquée comme vue');
   } catch (error) {
-    return apiResponse.error(res, error, 'Failed to update alert');
+    return apiResponse.error(res, error, 'Échec de la mise à jour de l\'alerte');
   }
 };
 
-exports.deleteAlert = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const affectedRows = await WeatherAlert.delete(id);
-    if (affectedRows === 0) {
-      return apiResponse.error(res, null, 'Alert not found', 404);
-    }
-    return apiResponse.success(res, null, 'Alert deleted successfully');
-  } catch (error) {
-    return apiResponse.error(res, error, 'Failed to delete alert');
-  }
-};
-
-exports.triggerAlert = async (req, res) => {
-  try {
-    const result = await weatherService.triggerAlert(req.body);
-    return apiResponse.success(res, result, 'Alert triggered successfully');
-  } catch (error) {
-    return apiResponse.error(res, error, 'Failed to trigger alert');
-  }
-};
-
-exports.syncAlerts = async (req, res) => {
+exports.synchroniserAlertesHorsLigne = async (req, res) => {
   try {
     const result = await weatherService.syncAlerts(req.body);
-    return apiResponse.success(res, result, 'Alerts synced successfully');
+    return apiResponse.success(res, result, 'Alertes synchronisées avec succès');
   } catch (error) {
-    return apiResponse.error(res, error, 'Failed to sync alerts');
+    return apiResponse.error(res, error, 'Échec de la synchronisation des alertes');
   }
 };
 
-exports.getEmergencyContacts = async (req, res) => {
+exports.supprimerAlerte = async (req, res) => {
   try {
-    // For demonstration, returning static data. Replace with DB query if needed.
-    const contacts = [
-      { region: 'Region A', phone: '123-456-7890' },
-      { region: 'Region B', phone: '098-765-4321' }
-    ];
-    return apiResponse.success(res, contacts, 'Emergency contacts retrieved successfully');
+    const alertId = req.params.alert_id;
+    const affectedRows = await WeatherAlert.delete(alertId);
+    if (affectedRows === 0) {
+      return apiResponse.error(res, null, 'Alerte non trouvée', 404);
+    }
+    return apiResponse.success(res, null, 'Alerte supprimée avec succès');
   } catch (error) {
-    return apiResponse.error(res, error, 'Failed to retrieve emergency contacts');
-  }
-};
-
-exports.getSafetyTips = async (req, res) => {
-  try {
-    // For demonstration, returning static data. Replace with DB query if needed.
-    const tips = [
-      { activity: 'Hiking', weather: 'Rainy', tip: 'Wear waterproof boots and carry a raincoat.' },
-      { activity: 'Skiing', weather: 'Snowy', tip: 'Check avalanche warnings before heading out.' }
-    ];
-    return apiResponse.success(res, tips, 'Safety tips retrieved successfully');
-  } catch (error) {
-    return apiResponse.error(res, error, 'Failed to retrieve safety tips');
+    return apiResponse.error(res, error, 'Échec de la suppression de l\'alerte');
   }
 };

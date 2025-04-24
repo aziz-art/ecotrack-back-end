@@ -2,28 +2,19 @@ const express = require('express');
 const router = express.Router();
 const alertsController = require('../controllers/alerts.controller');
 
-// Create a new alert
-router.post('/alerts/create', alertsController.createAlert);
+// Create a new alert (manual or automatic)
+router.post('/api/alertes', alertsController.declencherAlerte);
 
-// Get active alerts
-router.get('/alerts/active', alertsController.getActiveAlerts);
+// Get active alerts for a user
+router.get('/api/alertes/actives/:user_id', alertsController.getAlertesActives);
 
-// Update an alert by id
-router.put('/alerts/:id', alertsController.updateAlert);
+// Mark an alert as seen by the user
+router.patch('/api/alertes/:alert_id/seen', alertsController.marquerCommeVue);
 
-// Delete an alert by id
-router.delete('/alerts/:id', alertsController.deleteAlert);
+// Synchronize offline cached alerts
+router.post('/api/alertes/sync', alertsController.synchroniserAlertesHorsLigne);
 
-// Trigger an alert automatically
-router.post('/alerts/trigger', alertsController.triggerAlert);
-
-// Sync alerts for offline mode
-router.post('/alerts/sync', alertsController.syncAlerts);
-
-// Get emergency contacts by region
-router.get('/emergency-contacts', alertsController.getEmergencyContacts);
-
-// Get safety tips by activity and weather
-router.get('/safety-tips', alertsController.getSafetyTips);
+// Delete or cancel an alert (admin or automatic)
+router.delete('/api/alertes/:alert_id', alertsController.supprimerAlerte);
 
 module.exports = router;
