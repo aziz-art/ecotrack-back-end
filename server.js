@@ -24,8 +24,21 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to Ecotrack Backend API" });
 });
 
-const authRoutes = require("./routes/auth.route");
-const messagesRoutes = require("./routes/messages.route");
+// Test route
+app.get('/test', (req, res) => {
+  res.send('Test route works');
+});
+
+const authRoutes = require('./routes/auth.route');
+const messagesRoutes = require('./routes/messages.route');
+const toursRoutes = require('./routes/tours.route');
+const alertsRoutes = require('./routes/alerts.route');
+
+// TODO: Import and use routes here
+app.use('/auth', authRoutes);
+app.use('/messages', messagesRoutes);
+app.use('/tours', toursRoutes);
+app.use('/', alertsRoutes);
 
 app.use("/reviews", reviewsRoutes);
 app.use("/guide-ratings", guideRatingsRoutes);
@@ -33,10 +46,7 @@ app.use("/preferences", preferencesRoutes);
 app.use("/recommendations", recommendationsRoutes);
 app.use("/history", activityRoutes);
 
-// TODO: Import and use routes here
-app.use("/auth", authRoutes);
 app.use("/booking", bookingRoutes);
-app.use("/messages", messagesRoutes);
 app.use("/payment", paymentRoutes);
 
 app.listen(port, () => {
